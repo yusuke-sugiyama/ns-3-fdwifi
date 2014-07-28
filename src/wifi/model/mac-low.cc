@@ -735,14 +735,14 @@ MacLow::ReceiveOk (Ptr<Packet> packet, double rxSnr, WifiMode txMode, WifiPreamb
      !addr1.IsBroadcast() &&
      !addr2.IsBroadcast() && addr2 != networkAddress )
     {
-      bool moreData = hdr.IsMoreData();
+      bool hasFrames = hdr.IsMoreData();
       bool nextHop = true;
       if(addr1 == GetAddress())
         {
           nextHop = false;
         }
-      GetSurroundNodeTable()->UpdateTable(addr2, nextHop, moreData);
-      NS_LOG_INFO(this << "nextHop=" << nextHop << " moreData=" << moreData);
+      GetSurroundNodeTable()->UpdateTable(addr2, nextHop, hasFrames);
+      NS_LOG_INFO(this << "nextHop=" << nextHop << " hasFrames=" << hasFrames);
     }
   
   bool isPrevNavZero = IsNavZero ();
@@ -833,10 +833,10 @@ MacLow::ReceiveOk (Ptr<Packet> packet, double rxSnr, WifiMode txMode, WifiPreamb
         }
       if (gotAck)
         {
-          bool moreData = hdr.IsMoreData();
+          bool hasFrames = hdr.IsMoreData();
           bool nextHop = true;
-          GetSurroundNodeTable()->UpdateTable(m_sendingAddress, nextHop, moreData);
-          NS_LOG_INFO(this << "receive ACK nextHop=" << nextHop << " moreData=" << moreData);
+          GetSurroundNodeTable()->UpdateTable(m_sendingAddress, nextHop, hasFrames);
+          NS_LOG_INFO(this << "receive ACK nextHop=" << nextHop << " hasFrames=" << hasFrames);
           m_listener->GotAck (rxSnr, txMode);
         }
       if (m_txParams.HasNextPacket ())

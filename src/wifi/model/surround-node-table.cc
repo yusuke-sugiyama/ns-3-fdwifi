@@ -58,17 +58,17 @@ SurroundNodeTable::SelectSecondaryTransmissionNode()
   for(uint32_t i = 0; i < Items.size(); i++){
     NS_LOG_DEBUG ("address:"   << Items[i]->GetAddress() <<
 		  " nexthop:"  << Items[i]->IsNextHop() <<
-		  " moredata:" << Items[i]->IsMoreData());
+		  " hasframes:" << Items[i]->IsHasFrames());
 
-    if(!Items[i]->IsNextHop() && Items[i]->IsMoreData())
+    if(!Items[i]->IsNextHop() && Items[i]->IsHasFrames())
       {
 	ItemPriorities[FIRST].push_back(i);
       }
-    else if(Items[i]->IsNextHop() && Items[i]->IsMoreData())
+    else if(Items[i]->IsNextHop() && Items[i]->IsHasFrames())
       {
 	ItemPriorities[SECOND].push_back(i);
       }
-    else if(Items[i]->IsNextHop() && !Items[i]->IsMoreData())
+    else if(Items[i]->IsNextHop() && !Items[i]->IsHasFrames())
       {
 	ItemPriorities[THIRD].push_back(i);
       }
@@ -110,10 +110,10 @@ SurroundNodeTable::GetRandom(double min, double max)
 }
   
 void
-SurroundNodeTable::AddItem(Mac48Address address, bool nextHop, bool moreData)
+SurroundNodeTable::AddItem(Mac48Address address, bool nextHop, bool hasFrames)
 {
-  NS_LOG_FUNCTION(this << address << nextHop << moreData);
-  Items.push_back(new SurroundNodeItem(address, nextHop, moreData));
+  NS_LOG_FUNCTION(this << address << nextHop << hasFrames);
+  Items.push_back(new SurroundNodeItem(address, nextHop, hasFrames));
 }
   
 void
@@ -150,31 +150,31 @@ SurroundNodeTable::UpdateNextHop(Mac48Address address, bool nextHop)
 }
   
 void
-SurroundNodeTable::UpdateMoreData(Mac48Address address, bool moreData)
+SurroundNodeTable::UpdateHasFrames(Mac48Address address, bool hasFrames)
 {
   NS_LOG_FUNCTION(this);
   for(unsigned int i = 0; i < Items.size(); i++)
     {
       if(Items[i]->GetAddress() == address)
 	{
-	  Items[i]->SetMoreData(moreData);
+	  Items[i]->SetHasFrames(hasFrames);
 	}
     }
 }
 
 void
-SurroundNodeTable::UpdateTable(Mac48Address address, bool nextHop, bool moreData)
+SurroundNodeTable::UpdateTable(Mac48Address address, bool nextHop, bool hasFrames)
 {
 
-  NS_LOG_FUNCTION(this << address << nextHop << moreData);
+  NS_LOG_FUNCTION(this << address << nextHop << hasFrames);
   if(IsExistsAddress(address))
     {
       UpdateNextHop(address, nextHop);
-      UpdateMoreData(address, moreData);
+      UpdateHasFrames(address, hasFrames);
     }
   else
     {
-      AddItem(address, nextHop, moreData);
+      AddItem(address, nextHop, hasFrames);
     }
 }
 
@@ -196,11 +196,11 @@ SurroundNodeTable::DeleteItemByAddress(Mac48Address address)
     }
 }
   
-SurroundNodeItem::SurroundNodeItem (Mac48Address address, bool nextHop, bool moreData)
+SurroundNodeItem::SurroundNodeItem (Mac48Address address, bool nextHop, bool hasFrames)
 {
   m_address = address;
   m_nextHop = nextHop;
-  m_moreData = moreData;
+  m_hasFrames = hasFrames;
 }
 
 SurroundNodeItem::~SurroundNodeItem ()
@@ -220,9 +220,9 @@ SurroundNodeItem::IsNextHop()
 }
 
 bool
-SurroundNodeItem::IsMoreData()
+SurroundNodeItem::IsHasFrames()
 {
-  return m_moreData;
+  return m_hasFrames;
 }
 
 void
@@ -232,15 +232,15 @@ SurroundNodeItem::SetNextHop(bool nextHop)
 }
 
 void
-SurroundNodeItem::SetMoreData(bool moreData)
+SurroundNodeItem::SetHasFrames(bool hasFrames)
 {
-  m_moreData = moreData;
+  m_hasFrames = hasFrames;
 }
 
 SurroundNodeItem*
 SurroundNodeItem::Copy ()
 {
-  return new SurroundNodeItem(GetAddress(), IsNextHop(), IsMoreData());
+  return new SurroundNodeItem(GetAddress(), IsNextHop(), IsHasFrames());
 }
   
 } // namespace ns3

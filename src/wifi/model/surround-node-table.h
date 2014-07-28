@@ -33,18 +33,18 @@ class SurroundNodeItem
 {
 public:
   ~SurroundNodeItem();
-  SurroundNodeItem (Mac48Address address, bool nextHop, bool moreData);
+  SurroundNodeItem (Mac48Address address, bool nextHop, bool hasFrames);
   Mac48Address GetAddress (void);
   bool IsNextHop  (void);
-  bool IsMoreData (void);
+  bool IsHasFrames (void);
   void SetNextHop  (bool nextHop);
-  void SetMoreData (bool moreData);
+  void SetHasFrames (bool hasFrames);
   SurroundNodeItem* Copy ();
   
 private:
   Mac48Address m_address;
   bool m_nextHop;
-  bool m_moreData;
+  bool m_hasFrames;
 };
 
 class SurroundNodeTable : public Object
@@ -57,8 +57,8 @@ public:
   bool IsExistsAddress(Mac48Address address);
   void DeleteItemByAddress(Mac48Address address);
   void UpdateNextHop(Mac48Address address, bool nextHop);
-  void UpdateMoreData(Mac48Address address, bool moreData);
-  void UpdateTable(Mac48Address address, bool nextHop, bool moreData);
+  void UpdateHasFrames(Mac48Address address, bool hasFrames);
+  void UpdateTable(Mac48Address address, bool nextHop, bool hasFrames);
   uint32_t GetRandom(double min, double max);
 
   SurroundNodeTable();
