@@ -30,6 +30,7 @@
 #include "wifi-mac-trailer.h"
 #include "busytone-tag.h"
 #include "secondary-tag.h"
+#include "source-tag.h"
 #include "ns3/simulator.h"
 #include "ns3/packet.h"
 #include "ns3/assert.h"
@@ -536,28 +537,31 @@ YansWifiPhy::StartReceivePacket (Ptr<Packet> packet,
   packet->PeekHeader (hdr);
   Time rxHeaderDuration = CalculateTxDuration (hdr.GetSize(), txVector, preamble);
   Time endHeader = Simulator::Now () + rxHeaderDuration;
+
+  SourceTag sourceTag;
+  packet->PeekPacketTag (sourceTag);
   
   NS_LOG_DEBUG("headerEvent:" << " start=" << Simulator::Now() << " end=" << endHeader);
   Ptr<InterferenceHelper::Event> headerEvent;
-  headerEvent = m_interference.AddSeparateHeader(hdr.GetSize(),
-						 txMode,
-						 preamble,
-						 Simulator::Now(),
-						 endHeader,
-						 rxPowerW,
-						 txVector,
-						 hdr.GetAddr2());
+  headerEvent = m_interference.Add (hdr.GetSize(),
+				    txMode,
+				    preamble,
+				    Simulator::Now(),
+				    endHeader,
+				    rxPowerW,
+				    txVector,
+				    sourceTag.GetAddress ());
 
   NS_LOG_DEBUG("payloadEvent:" << " start=" << endHeader << " end=" << endRx);
   Ptr<InterferenceHelper::Event> payloadEvent;
-  payloadEvent = m_interference.AddSeparateHeader (hdr.GetSize(),
-						   txMode,
-						   preamble,
-						   endHeader,
-						   endRx,
-						   rxPowerW,
-						   txVector,
-						   hdr.GetAddr2());
+  payloadEvent = m_interference.Add (hdr.GetSize(),
+				     txMode,
+				     preamble,
+				     endHeader,
+				     endRx,
+				     rxPowerW,
+				     txVector,
+				     hdr.GetAddr2());
   
   switch (m_state->GetState ())
     {
@@ -628,9 +632,6 @@ YansWifiPhy::StartReceivePacket (Ptr<Packet> packet,
                                                     txVector);
 	  // set address, rx power and event
 	  m_event = payloadEvent;
-	  m_receivingAddress = hdr.GetAddr2();
-          m_receivingRxPowerW = rxPowerW;
-	  m_receivingTime = Simulator::Now();
 
           SetReceivingTxVector(txVector);
           SetReceivingPreamble(preamble);
@@ -1141,7 +1142,6 @@ YansWifiPhy::SendBusytone(Ptr<const Packet> packet, WifiTxVector txVector)
     }
   Time timeOffset = MicroSeconds(GetPayloadDurationMicroSeconds(packet->GetSize() + busytoneSize - tmpHdr.GetSize(), txVector));
   WifiMacHeader busytoneHdr;
-
   busytoneHdr.SetType (WIFI_MAC_CTL_BUSY);
   busytoneHdr.SetDsNotFrom ();
   busytoneHdr.SetDsNotTo ();
@@ -1149,6 +1149,7 @@ YansWifiPhy::SendBusytone(Ptr<const Packet> packet, WifiTxVector txVector)
   busytoneHdr.SetNoRetry ();
   busytoneHdr.SetAddr1 (addr1);
   busytoneHdr.SetDuration (MicroSeconds(0));
+
 
   // Create preamble
   WifiPreamble preamble;
@@ -1172,6 +1173,10 @@ YansWifiPhy::SendBusytone(Ptr<const Packet> packet, WifiTxVector txVector)
 
       Ptr<Packet> busytone;
       busytone = Create<Packet>(pktSize - (busytoneHdr.GetSize() + 4));
+
+      SourceTag sourceTag;
+      sourceTag.SetAddress (m_macLow->GetAddress());
+      busytone->AddPacketTag (sourceTag);
       
       busytoneHdr.SetDuration (Time(0));
       busytone->AddHeader (busytoneHdr);

@@ -33,10 +33,10 @@
 #include "surround-node-table.h"
 #include "busytone-tag.h"
 #include "secondary-tag.h"
+#include "source-tag.h"
 #include "qos-utils.h"
 #include "edca-txop-n.h"
 #include "snr-tag.h"
-
 
 NS_LOG_COMPONENT_DEFINE ("MacLow");
 
@@ -687,9 +687,6 @@ MacLow::ReceiveError (Ptr<const Packet> packet, double rxSnr)
   NS_LOG_FUNCTION (this << packet << rxSnr);
   NS_LOG_DEBUG ("rx failed ");
 
-  WifiMacHeader hdr;
-  Ptr<Packet> tmp_packet = packet->Copy();
-  tmp_packet->RemoveHeader (hdr);
   if (m_txParams.MustWaitFastAck ())
     {
       NS_ASSERT (m_fastAckFailedTimeoutEvent.IsExpired ());
@@ -726,6 +723,9 @@ MacLow::ReceiveOk (Ptr<Packet> packet, double rxSnr, WifiMode txMode, WifiPreamb
    */
   WifiMacHeader hdr;
   packet->RemoveHeader (hdr);
+
+  SourceTag sourceTag;
+  packet->RemovePacketTag (sourceTag);
 
   // update surround node table
   Mac48Address addr1 = hdr.GetAddr1();
@@ -1331,6 +1331,9 @@ MacLow::ForwardDown (Ptr<const Packet> packet, const WifiMacHeader* hdr,
                      WifiTxVector txVector, WifiPreamble preamble)
 {
   NS_LOG_FUNCTION (this << packet << hdr << txVector);
+  SourceTag sourceTag;
+  sourceTag.SetAddress (m_self);
+  packet->AddPacketTag (sourceTag);
   NS_LOG_DEBUG ("send " << hdr->GetTypeString () <<
                 ", to=" << hdr->GetAddr1 () <<
                 ", size=" << packet->GetSize () <<

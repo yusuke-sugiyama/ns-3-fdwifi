@@ -486,10 +486,7 @@ private:
   WifiTxVector m_sendingTxVector;
   WifiPreamble m_sendingPreamble;
   double       m_sendingPowerDbm;
-  Mac48Address m_receivingAddress;
-  Time m_receivingTime;
   bool m_headerErrorFlg;
-  double m_receivingRxPowerW;
   Time m_primaryTransmissionEndTime;
   Ptr<InterferenceHelper::Event> m_event;
 
