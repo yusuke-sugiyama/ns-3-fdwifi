@@ -147,7 +147,7 @@ WifiPhyStateHelper::GetDelayUntilIdle (void)
       retval = Seconds (0);
       break;
     case WifiPhy::FD:
-      if(m_endRx < m_endTx)
+      if(m_endRx > m_endTx)
         {
           retval = m_endRx - Simulator::Now ();
         }
