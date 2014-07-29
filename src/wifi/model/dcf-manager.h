@@ -373,7 +373,6 @@ public:
   bool IsBusyForFullDuplex (void);
   Time GetSecondaryGrantedTime ();
   Time GetAccessGrantStartForSecondary (void) const;
-  bool IsSendBusytoneGranted ();
 private:
   /**
    * Update backoff slots for all DcfStates.
