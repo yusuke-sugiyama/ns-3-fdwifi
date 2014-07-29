@@ -283,12 +283,6 @@ public:
   {
     m_macLow->NotifySwitchingStartNow (duration);
   }
-  virtual void NotifyTxPostpone (Time endTime)
-  {
-  }
-  virtual void NotifyRxPostpone (Time endTime)
-  {
-  }
 
 private:
   ns3::MacLow *m_macLow;
@@ -731,18 +725,19 @@ MacLow::ReceiveOk (Ptr<Packet> packet, double rxSnr, WifiMode txMode, WifiPreamb
   Mac48Address addr1 = hdr.GetAddr1();
   Mac48Address addr2 = hdr.GetAddr2();
   static Mac48Address networkAddress = Mac48Address ("00:00:00:00:00:00");
+  //  m_sendingAddress = m_currentHdr.GetAddr1();
   if(hdr.GetType() == WIFI_MAC_DATA &&
      !addr1.IsBroadcast() &&
      !addr2.IsBroadcast() && addr2 != networkAddress )
     {
-      bool hasFrames = hdr.IsMoreData();
-      bool nextHop = true;
+      bool moreData = hdr.IsMoreData();
+      bool nextHop = false;
       if(addr1 == GetAddress())
         {
-          nextHop = false;
+          nextHop = true;
         }
-      GetSurroundNodeTable()->UpdateTable(addr2, nextHop, hasFrames);
-      NS_LOG_INFO(this << "nextHop=" << nextHop << " hasFrames=" << hasFrames);
+      GetSurroundNodeTable()->UpdateTable(addr2, nextHop, moreData);
+      NS_LOG_INFO(this << "nextHop=" << nextHop << " moreData=" << moreData);
     }
   
   bool isPrevNavZero = IsNavZero ();
@@ -833,10 +828,10 @@ MacLow::ReceiveOk (Ptr<Packet> packet, double rxSnr, WifiMode txMode, WifiPreamb
         }
       if (gotAck)
         {
-          bool hasFrames = hdr.IsMoreData();
+          bool moreData = hdr.IsMoreData();
           bool nextHop = true;
-          GetSurroundNodeTable()->UpdateTable(m_destinationAddress, nextHop, hasFrames);
-          NS_LOG_INFO(this << "receive ACK nextHop=" << nextHop << " hasFrames=" << hasFrames);
+          GetSurroundNodeTable()->UpdateTable(m_sendingAddress, nextHop, moreData);
+          NS_LOG_INFO(this << "receive ACK nextHop=" << nextHop << " moreData=" << moreData);
           m_listener->GotAck (rxSnr, txMode);
         }
       if (m_txParams.HasNextPacket ())
@@ -1475,7 +1470,6 @@ MacLow::SendRtsForPacket (void)
 void
 MacLow::StartDataTxTimers (WifiTxVector dataTxVector)
 {
-  NS_LOG_FUNCTION(this);
   WifiPreamble preamble;
  
   //Since it is data then it can have format = GF
@@ -1679,7 +1673,7 @@ MacLow::SendSecondaryDataPacket (void)
     }
   m_currentHdr.SetDuration (duration);
 
-  // compare primaryEndTime with secondaryEndTime
+  // Durationとパケットの長さを比較する
   Time primaryEndTime = m_phy->GetPrimaryTransmissionEndTime();
   Time secondaryEndDuration = m_phy->CalculateTxDuration(m_currentPacket->GetSize() +
                                                          m_currentHdr.GetSize(),
@@ -1691,7 +1685,7 @@ MacLow::SendSecondaryDataPacket (void)
   Time secondaryEndTime = secondaryEndDuration + Simulator::Now();
   uint32_t busytoneSize = 0;
   NS_LOG_DEBUG("primary=" << primaryEndTime << " secondary=" << secondaryEndTime);
-  // 10000ns ignore
+  // 10000nsのずれなら無視
   if(primaryEndTime > secondaryEndTime + MicroSeconds(10))
     {
       NS_LOG_INFO("primaryEndtime > secondaryEndtime");
@@ -1700,6 +1694,7 @@ MacLow::SendSecondaryDataPacket (void)
       busytoneSize = m_phy->GetPacketSizeFromDuration (timeOffset, dataTxVector);
     }
 
+  // セカンダリと識別の判定にBusytoneを利用を利用しているため
   BusytoneTag busytone;
   busytone.SetDataSize (busytoneSize);
   m_currentPacket->AddPacketTag (busytone);
@@ -1711,27 +1706,29 @@ MacLow::SendSecondaryDataPacket (void)
 
   StartSecondaryDataTxTimers (dataTxVector);
 
+  /* [add] 20140612 Add addr4 */
   if(m_currentHdr.GetType () == WIFI_MAC_DATA)
     {
       NS_LOG_DEBUG(m_phy->GetReceivingAddress4());
       Mac48Address secondaryAddress = m_phy->GetReceivingAddress4();
+      m_secondaryAddress = secondaryAddress;
       m_currentHdr.SetAddr4(secondaryAddress);
-      NS_LOG_DEBUG("set secondaryaddress=" << secondaryAddress);
     }
-  if(GetDcaTxop()->IsQueueEmpty())
-    {
-      m_currentHdr.SetMoreData(false);
-    }
-  else
+  if(!GetDcaTxop()->IsQueueEmpty())
     {
       m_currentHdr.SetMoreData(true);
     }
-  m_destinationAddress = m_currentHdr.GetAddr1();
+  else
+    {
+      m_currentHdr.SetMoreData(false);
+    }
+  m_sendingAddress = m_currentHdr.GetAddr1();
 
   m_currentPacket->AddHeader (m_currentHdr);
   WifiMacTrailer fcs;
   m_currentPacket->AddTrailer (fcs);
 
+  // セカンダリ送信のパケットを生成して送信
   ForwardDown (m_currentPacket, &m_currentHdr, dataTxVector,preamble);
   m_currentPacket = 0;
 }
@@ -1793,21 +1790,22 @@ MacLow::SendDataPacket (void)
 
   if(m_currentHdr.GetType () == WIFI_MAC_DATA)
     {
+      m_secondaryAddress = addr4;
       m_currentHdr.SetAddr4(addr4);
     }
 
-  if(GetDcaTxop()->IsQueueEmpty())
+  if(!GetDcaTxop()->IsQueueEmpty())
     {
-      m_currentHdr.SetMoreData(false);
+      m_currentHdr.SetMoreData(true);
     }
   else
     {
-      m_currentHdr.SetMoreData(true);
+      m_currentHdr.SetMoreData(false);
     }
   NS_LOG_INFO("Set address4=" << m_currentHdr.GetAddr4() << " moreData " << m_currentHdr.IsMoreData());
   /* [end] */
 
-  m_destinationAddress = m_currentHdr.GetAddr1();
+  m_sendingAddress = m_currentHdr.GetAddr1();
 
   m_currentHdr.SetDuration (duration);
 
@@ -2030,6 +2028,9 @@ MacLow::SendAckAfterData (Mac48Address source, Time duration, WifiMode dataTxMod
   /* send an ACK when you receive
    * a packet after SIFS.
    */
+  /*
+   * 送信中にACKを返さなければならなくなる可能性がある
+   */
   if(m_phy->IsStateTx() || m_phy->IsStateFd())
     {
       NS_LOG_DEBUG("can not send ACK.");
@@ -2045,13 +2046,13 @@ MacLow::SendAckAfterData (Mac48Address source, Time duration, WifiMode dataTxMod
   ack.SetAddr1 (source);
   duration -= GetAckDuration (ackTxVector);
   duration -= GetSifs ();
-  if(GetDcaTxop()->IsQueueEmpty())
+  if(!GetDcaTxop()->IsQueueEmpty())
     {
-      ack.SetMoreData(false);
+      ack.SetMoreData(true);
     }
   else
     {
-      ack.SetMoreData(true);
+      ack.SetMoreData(false);
     }
   NS_LOG_INFO("ACK duration" << duration);
   NS_ASSERT (duration >= MicroSeconds (0));

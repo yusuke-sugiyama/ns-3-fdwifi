@@ -1138,7 +1138,7 @@ private:
   Time m_lastNavDuration;  //!< The duration of the latest NAV
 
   bool m_promisc;  //!< Flag if the device is operating in promiscuous mode
-  Mac48Address m_sendingAddress;
+  Mac48Address m_destinationAddress;
   class PhyMacLowListener * m_phyMacLowListener; //!< Listerner needed to monitor when a channel switching occurs.
 
   /*

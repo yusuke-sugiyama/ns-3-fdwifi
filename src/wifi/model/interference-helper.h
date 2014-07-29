@@ -219,13 +219,13 @@ private:
                                       Time duration, double rxPower, WifiTxVector txvector,
                                       Mac48Address address);
 
-  Ptr<InterferenceHelper::Event> AddSeparateHeader (uint32_t size, WifiMode payloadMode,
-                                                    enum WifiPreamble preamble,
-                                                    Time endTime,
-                                                    Time startTime,
-                                                    double rxPower,
-                                                    WifiTxVector txvector,
-                                                    Mac48Address address);
+  Ptr<InterferenceHelper::Event> Add (uint32_t size, WifiMode payloadMode,
+                                      enum WifiPreamble preamble,
+                                      Time endTime,
+                                      Time startTime,
+                                      double rxPower,
+                                      WifiTxVector txvector,
+                                      Mac48Address address);
 
   /**
    * Calculate the SNIR at the start of the packet and accumulate
@@ -305,7 +305,7 @@ private:
    * \param event
    */
   void AppendEvent (Ptr<Event> event);
-  void AppendEventSeparateHeader (Ptr<Event> event);
+  void AppendEventForFutureEvent (Ptr<Event> event);
   /**
    * Calculate noise and interference power in W.
    *

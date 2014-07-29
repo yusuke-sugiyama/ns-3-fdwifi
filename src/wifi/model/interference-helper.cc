@@ -217,11 +217,11 @@ InterferenceHelper::Add (uint32_t size, WifiMode payloadMode,
 }
 
 Ptr<InterferenceHelper::Event>
-InterferenceHelper::AddSeparateHeader (uint32_t size, WifiMode payloadMode,
-                                       enum WifiPreamble preamble,
-                                       Time startTime, Time endTime,
-                                       double rxPowerW, WifiTxVector txVector,
-                                       Mac48Address address)
+InterferenceHelper::Add (uint32_t size, WifiMode payloadMode,
+                         enum WifiPreamble preamble,
+                         Time startTime, Time endTime,
+                         double rxPowerW, WifiTxVector txVector,
+                         Mac48Address address)
 {
   Ptr<InterferenceHelper::Event> event;
   event = Create<InterferenceHelper::Event> (size,
@@ -235,7 +235,7 @@ InterferenceHelper::AddSeparateHeader (uint32_t size, WifiMode payloadMode,
   NS_LOG_DEBUG("startTime " << startTime << " endTime " << endTime <<
                " rxPowerW " << rxPowerW << " address " << address);
   UpdateEvent(event);
-  AppendEventSeparateHeader (event);
+  AppendEventForFutureEvent (event);
   return event;
 }
 void
@@ -377,7 +377,7 @@ InterferenceHelper::AppendEvent (Ptr<InterferenceHelper::Event> event)
 }
 
 void
-InterferenceHelper::AppendEventSeparateHeader (Ptr<InterferenceHelper::Event> event)
+InterferenceHelper::AppendEventForFutureEvent (Ptr<InterferenceHelper::Event> event)
 {
   Time now = Simulator::Now ();
   NS_LOG_DEBUG("Append now " << now << "start"<< event->GetStartTime () << "end" << event->GetEndTime ());
@@ -817,10 +817,6 @@ InterferenceHelper::CalculateSnrPer (Ptr<InterferenceHelper::Event> event)
     {
       nowIterator--;
     }
-  else
-    {
-      NS_LOG_DEBUG("[mark3]");
-    }
   for (NiChanges::iterator i = m_niChanges.begin (); i != nowIterator; i++)
     {
       NS_LOG_DEBUG("start " << i->GetTime() << " GetDelta ()" << i->GetDelta ());
@@ -854,10 +850,6 @@ InterferenceHelper::CalculateSnrPerPayload (Ptr<InterferenceHelper::Event> event
   if(m_niChanges.begin() != nowIterator)
     {
       nowIterator--;
-    }
-  else
-    {
-      NS_LOG_DEBUG("[mark2]");
     }
   for (NiChanges::iterator i = m_niChanges.begin (); i != nowIterator; i++)
     {
