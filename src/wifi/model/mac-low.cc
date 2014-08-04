@@ -748,11 +748,7 @@ MacLow::ReceiveOk (Ptr<Packet> packet, double rxSnr, WifiMode txMode, WifiPreamb
   bool isPrevNavZero = IsNavZero ();
   NS_LOG_DEBUG ("duration/id=" << hdr.GetDuration ());
   NotifyNav (packet, hdr, txMode, preamble);
-  if (hdr.IsBusy ())
-    {
-      //      m_listener->GotBusytone ();
-      return;
-    }
+
   if (hdr.IsRts ())
     {
       /* see section 9.2.5.7 802.11-1999

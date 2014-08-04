@@ -115,10 +115,6 @@ public:
   {
     m_txop->EndTxNoAck ();
   }
-  virtual void GotBusytone ()
-  {
-    m_txop->GotBusytone ();
-  }
 
 private:
   DcaTxop *m_txop;
@@ -689,13 +685,6 @@ DcaTxop::MissedCts (void)
     }
   m_dcf->StartBackoffNow (m_rng->GetNext (0, m_dcf->GetCw ()));
   RestartAccessIfNeeded ();
-}
-void
-DcaTxop::GotBusytone ()
-{
-  NS_LOG_FUNCTION (this);
-  RestartAccessIfNeeded ();
-  NS_LOG_DEBUG ("got Busy. tx not done");
 }
 void
 DcaTxop::GotAck (double snr, WifiMode txMode)

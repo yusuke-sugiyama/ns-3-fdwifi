@@ -220,11 +220,6 @@ private:
    */
   void GotAck (double snr, WifiMode txMode);
   /**
-   * Event handler when an Busytone is received.
-   *
-   */
-  void GotBusytone ();
-  /**
    * Event handler when an ACK is received.
    */
   void MissedAck (void);
