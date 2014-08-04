@@ -134,11 +134,6 @@ public:
    * 
    */
   virtual void EndTxNoAck (void) = 0;
-  /**
-   * ns3::MacLow did receive an Busytone packet
-   * within CtsTimeout.
-   */
-  virtual void GotBusytone () = 0;
 };
 
 
