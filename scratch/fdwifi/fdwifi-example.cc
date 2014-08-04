@@ -171,7 +171,7 @@ int main (int argc, char *argv[]) {
   ns3::Packet::EnablePrinting();
 
   double   distance = 90;
-  int nodeAmount = 2;
+  int nodeAmount = 3;
   double   rate = 0.002;
   string format ("omnet");
 
@@ -273,21 +273,21 @@ int main (int argc, char *argv[]) {
   //-- Create a custom traffic source and sink
   //--------------------------------------------
   NS_LOG_INFO ("Create traffic source & sink.");
-  Ptr<Node>     node[nodeAmount];
-  Ptr<Sender>   sender[nodeAmount];
-  Ptr<Receiver> receiver[nodeAmount];
+  Ptr<Node>       node[nodeAmount];
+  Ptr<FdSender>   sender[nodeAmount];
+  Ptr<FdReceiver> receiver[nodeAmount];
 
   for(int i = 0; i < nodeAmount; i++){
     node    [i] = NodeList::GetNode (i);
-    sender  [i] = CreateObject<Sender>();
-    receiver[i] = CreateObject<Receiver>();
+    sender  [i] = CreateObject<FdSender>();
+    receiver[i] = CreateObject<FdReceiver>();
     node[i]->AddApplication (sender[i]);
     node[i]->AddApplication (receiver[i]);
     sender  [i]->SetStartTime (Seconds (0));
     receiver[i]->SetStartTime (Seconds (0));
   }
 
-  std::string strSourceSender0 ("/NodeList/0/ApplicationList/*/$Sender/");
+  std::string strSourceSender0 ("/NodeList/0/ApplicationList/*/$FdSender/");
 
   std::ostringstream rateString;
   rateString << rate;
@@ -296,7 +296,7 @@ int main (int argc, char *argv[]) {
   std::string numPacketSyntax = "/NodeList/";
   std::ostringstream nodeAmountString;
   nodeAmountString << nodeAmount - 1;
-  numPacketSyntax += nodeAmountString.str() + "/ApplicationList/*/$Receiver/NumPackets";
+  numPacketSyntax += nodeAmountString.str() + "/ApplicationList/*/$FdReceiver/NumPackets";
   std::string EndAddress = "192.168.0.";
   std::ostringstream nodeAmountString2;
   nodeAmountString2 << nodeAmount;
@@ -363,7 +363,7 @@ int main (int argc, char *argv[]) {
   /* Application level trace */
   Ptr<PacketSizeMinMaxAvgTotalCalculator> appTxPkts = CreateObject<PacketSizeMinMaxAvgTotalCalculator>();
   Ptr<TimeMinMaxAvgTotalCalculator> delayStat = CreateObject<TimeMinMaxAvgTotalCalculator>();
-  std::string strReceiver("/NodeList/*/ApplicationList/*/$Receiver/");
+  std::string strReceiver("/NodeList/*/ApplicationList/*/$FdReceiver/");
   Config::Connect (strReceiver + "Rx", MakeBoundCallback (&AppSenderRx, endTime));
 
   delayStat->SetKey ("delay");

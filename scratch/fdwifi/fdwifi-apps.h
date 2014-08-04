@@ -34,11 +34,11 @@ using namespace ns3;
 
 //----------------------------------------------------------------------
 //------------------------------------------------------
-class Sender : public Application {
+class FdSender : public Application {
 public:
   static TypeId GetTypeId (void);
-  Sender();
-  virtual ~Sender();
+  FdSender();
+  virtual ~FdSender();
 
 protected:
   virtual void DoDispose (void);
@@ -61,18 +61,18 @@ private:
   TracedCallback<Ptr<const Packet> > m_txTrace;
 
 
-  // end class Sender
+  // end class FdSender
 };
 
 
 
 
 //------------------------------------------------------
-class Receiver : public Application {
+class FdReceiver : public Application {
 public:
   static TypeId GetTypeId (void);
-  Receiver();
-  virtual ~Receiver();
+  FdReceiver();
+  virtual ~FdReceiver();
 
   void SetCounter (Ptr<CounterCalculator<> > calc);
   void SetDelayTracker (Ptr<TimeMinMaxAvgTotalCalculator> delay);
@@ -95,14 +95,14 @@ private:
   Ptr<CounterCalculator<> > m_calc;
   Ptr<TimeMinMaxAvgTotalCalculator> m_delay;
   TracedCallback<uint32_t, uint32_t > m_rxTrace;
-  // end class Receiver
+  // end class FdReceiver
 };
 
 
 
 
 //------------------------------------------------------
-class TimestampTag : public Tag {
+class FdTimestampTag : public Tag {
 public:
   static TypeId GetTypeId (void);
   virtual TypeId GetInstanceTypeId (void) const;

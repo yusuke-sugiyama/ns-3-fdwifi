@@ -40,39 +40,39 @@ using namespace ns3;
 NS_LOG_COMPONENT_DEFINE ("FdWifiApps");
 
 TypeId
-Sender::GetTypeId (void)
+FdSender::GetTypeId (void)
 {
-  static TypeId tid = TypeId ("Sender")
+  static TypeId tid = TypeId ("FdSender")
     .SetParent<Application> ()
-    .AddConstructor<Sender> ()
+    .AddConstructor<FdSender> ()
     .AddAttribute ("PacketSize", "The size of packets transmitted.",
                    UintegerValue (1500),
-                   MakeUintegerAccessor (&Sender::m_pktSize),
+                   MakeUintegerAccessor (&FdSender::m_pktSize),
                    MakeUintegerChecker<uint32_t>(1))
     .AddAttribute ("Destination", "Target host address.",
                    Ipv4AddressValue ("255.255.255.255"),
-                   MakeIpv4AddressAccessor (&Sender::m_destAddr),
+                   MakeIpv4AddressAccessor (&FdSender::m_destAddr),
                    MakeIpv4AddressChecker ())
     .AddAttribute ("Port", "Destination app port.",
                    UintegerValue (1603),
-                   MakeUintegerAccessor (&Sender::m_destPort),
+                   MakeUintegerAccessor (&FdSender::m_destPort),
                    MakeUintegerChecker<uint32_t>())
     .AddAttribute ("Interval", "Delay between transmissions.",
                    StringValue ("ns3::ConstantRandomVariable[Constant=1]"),
-                   MakePointerAccessor (&Sender::m_interval),
+                   MakePointerAccessor (&FdSender::m_interval),
                    MakePointerChecker <RandomVariableStream>())
     .AddAttribute ("Stream", "Random Stream.",
                    StringValue ("ns3::UniformRandomVariable[Stream=-1]"),
-                   MakePointerAccessor (&Sender::m_random),
+                   MakePointerAccessor (&FdSender::m_random),
                    MakePointerChecker <RandomVariableStream>())
     .AddTraceSource ("Tx", "A new packet is created and is sent",
-                     MakeTraceSourceAccessor (&Sender::m_txTrace))
+                     MakeTraceSourceAccessor (&FdSender::m_txTrace))
   ;
   return tid;
 }
 
 
-Sender::Sender()
+FdSender::FdSender()
 {
   NS_LOG_FUNCTION_NOARGS ();
   m_interval = CreateObject<ConstantRandomVariable> ();
@@ -80,13 +80,13 @@ Sender::Sender()
   m_random = CreateObject<UniformRandomVariable> ();
 }
 
-Sender::~Sender()
+FdSender::~FdSender()
 {
   NS_LOG_FUNCTION_NOARGS ();
 }
 
 void
-Sender::DoDispose (void)
+FdSender::DoDispose (void)
 {
   NS_LOG_FUNCTION_NOARGS ();
 
@@ -95,7 +95,7 @@ Sender::DoDispose (void)
   Application::DoDispose ();
 }
 
-void Sender::StartApplication ()
+void FdSender::StartApplication ()
 {
   NS_LOG_FUNCTION_NOARGS ();
 
@@ -107,19 +107,19 @@ void Sender::StartApplication ()
     }
 
   Simulator::Cancel (m_sendEvent);
-  m_sendEvent = Simulator::ScheduleNow (&Sender::SendPacket, this);
+  m_sendEvent = Simulator::ScheduleNow (&FdSender::SendPacket, this);
 
-  // end Sender::StartApplication
+  // end FdSender::StartApplication
 }
 
-void Sender::StopApplication ()
+void FdSender::StopApplication ()
 {
   NS_LOG_FUNCTION_NOARGS ();
   Simulator::Cancel (m_sendEvent);
-  // end Sender::StopApplication
+  // end FdSender::StopApplication
 }
 
-void Sender::SendPacket ()
+void FdSender::SendPacket ()
 {
   NS_LOG_FUNCTION_NOARGS ();
   NS_LOG_INFO ("Sending packet at " << Simulator::Now () << " to " <<
@@ -128,7 +128,7 @@ void Sender::SendPacket ()
   Ptr<Packet> packet = Create<Packet>(m_pktSize);
   
 
-  TimestampTag timestamp;
+  FdTimestampTag timestamp;
   timestamp.SetTimestamp (Simulator::Now ());
   packet->AddByteTag (timestamp);
 
@@ -142,7 +142,7 @@ void Sender::SendPacket ()
   double logval = -log(m_random->GetValue());
   Time nextTxTime = Seconds (interval * logval);
   NS_LOG_INFO("nextTime:" << nextTxTime << " in:" << interval << " log:" << logval);
-  m_sendEvent = Simulator::Schedule (nextTxTime, &Sender::SendPacket, this);
+  m_sendEvent = Simulator::Schedule (nextTxTime, &FdSender::SendPacket, this);
 
 }
 
@@ -150,29 +150,29 @@ void Sender::SendPacket ()
 
 
 //----------------------------------------------------------------------
-//-- Receiver
+//-- FdReceiver
 //------------------------------------------------------
 TypeId
-Receiver::GetTypeId (void)
+FdReceiver::GetTypeId (void)
 {
-  static TypeId tid = TypeId ("Receiver")
+  static TypeId tid = TypeId ("FdReceiver")
     .SetParent<Application> ()
-    .AddConstructor<Receiver> ()
+    .AddConstructor<FdReceiver> ()
     .AddAttribute ("Port", "Listening port.",
                    UintegerValue (1603),
-                   MakeUintegerAccessor (&Receiver::m_port),
+                   MakeUintegerAccessor (&FdReceiver::m_port),
                    MakeUintegerChecker<uint32_t>())
     .AddAttribute ("NumPackets", "Total number of packets to recv.",
                    UintegerValue (0),
-                   MakeUintegerAccessor (&Receiver::m_numPkts),
+                   MakeUintegerAccessor (&FdReceiver::m_numPkts),
                    MakeUintegerChecker<uint32_t>(0))
     .AddTraceSource ("Rx", "Receive data packet",
-                     MakeTraceSourceAccessor (&Receiver::m_rxTrace))
+                     MakeTraceSourceAccessor (&FdReceiver::m_rxTrace))
   ;
   return tid;
 }
 
-Receiver::Receiver() :
+FdReceiver::FdReceiver() :
   m_calc (0),
   m_delay (0)
 {
@@ -180,13 +180,13 @@ Receiver::Receiver() :
   m_socket = 0;
 }
 
-Receiver::~Receiver()
+FdReceiver::~FdReceiver()
 {
   NS_LOG_FUNCTION_NOARGS ();
 }
 
 void
-Receiver::DoDispose (void)
+FdReceiver::DoDispose (void)
 {
   NS_LOG_FUNCTION_NOARGS ();
 
@@ -196,7 +196,7 @@ Receiver::DoDispose (void)
 }
 
 void
-Receiver::StartApplication ()
+FdReceiver::StartApplication ()
 {
   NS_LOG_FUNCTION_NOARGS ();
 
@@ -209,14 +209,14 @@ Receiver::StartApplication ()
       m_socket->Bind (local);
     }
 
-  m_socket->SetRecvCallback (MakeCallback (&Receiver::Receive, this));
+  m_socket->SetRecvCallback (MakeCallback (&FdReceiver::Receive, this));
   m_count = 0;
 
-  // end Receiver::StartApplication
+  // end FdReceiver::StartApplication
 }
 
 void
-Receiver::StopApplication ()
+FdReceiver::StopApplication ()
 {
   NS_LOG_FUNCTION_NOARGS ();
 
@@ -224,24 +224,24 @@ Receiver::StopApplication ()
       m_socket->SetRecvCallback (MakeNullCallback<void, Ptr<Socket> > ());
     }
 
-  // end Receiver::StopApplication
+  // end FdReceiver::StopApplication
 }
 
 void
-Receiver::SetCounter (Ptr<CounterCalculator<> > calc)
+FdReceiver::SetCounter (Ptr<CounterCalculator<> > calc)
 {
   m_calc = calc;
-  // end Receiver::SetCounter
+  // end FdReceiver::SetCounter
 }
 void
-Receiver::SetDelayTracker (Ptr<TimeMinMaxAvgTotalCalculator> delay)
+FdReceiver::SetDelayTracker (Ptr<TimeMinMaxAvgTotalCalculator> delay)
 {
   m_delay = delay;
-  // end Receiver::SetDelayTracker
+  // end FdReceiver::SetDelayTracker
 }
 
 void
-Receiver::Receive (Ptr<Socket> socket)
+FdReceiver::Receive (Ptr<Socket> socket)
 {
   // NS_LOG_FUNCTION (this << socket << packet << from);
   
@@ -249,10 +249,10 @@ Receiver::Receive (Ptr<Socket> socket)
   Address from;
   while ((packet = socket->RecvFrom (from))) {
     if (InetSocketAddress::IsMatchingType (from)) {
-      NS_LOG_INFO ("Received " << packet->GetSize () << " bytes from " <<
+      NS_LOG_INFO ("FdReceived " << packet->GetSize () << " bytes from " <<
 		   InetSocketAddress::ConvertFrom (from).GetIpv4 ());
     }
-    TimestampTag timestamp;
+    FdTimestampTag timestamp;
     // Should never not be found since the sender is adding it, but
     // you never know.
     if (packet->FindFirstMatchingByteTag (timestamp) && m_numPkts != 0) {
@@ -273,48 +273,45 @@ Receiver::Receive (Ptr<Socket> socket)
     // end receiving packets
   }
   
-  // end Receiver::Receive
+  // end FdReceiver::FdReceive
 }
 
-
-
-
 //----------------------------------------------------------------------
-//-- TimestampTag
+//-- FdTimestampTag
 //------------------------------------------------------
 TypeId 
-TimestampTag::GetTypeId (void)
+FdTimestampTag::GetTypeId (void)
 {
-  static TypeId tid = TypeId ("TimestampTag")
+  static TypeId tid = TypeId ("FdTimestampTag")
     .SetParent<Tag> ()
-    .AddConstructor<TimestampTag> ()
-    .AddAttribute ("Timestamp",
+    .AddConstructor<FdTimestampTag> ()
+    .AddAttribute ("FdTimestamp",
                    "Some momentous point in time!",
                    EmptyAttributeValue (),
-                   MakeTimeAccessor (&TimestampTag::GetTimestamp),
+                   MakeTimeAccessor (&FdTimestampTag::GetTimestamp),
                    MakeTimeChecker ())
   ;
   return tid;
 }
 TypeId 
-TimestampTag::GetInstanceTypeId (void) const
+FdTimestampTag::GetInstanceTypeId (void) const
 {
   return GetTypeId ();
 }
 
 uint32_t 
-TimestampTag::GetSerializedSize (void) const
+FdTimestampTag::GetSerializedSize (void) const
 {
   return 8;
 }
 void 
-TimestampTag::Serialize (TagBuffer i) const
+FdTimestampTag::Serialize (TagBuffer i) const
 {
   int64_t t = m_timestamp.GetNanoSeconds ();
   i.Write ((const uint8_t *)&t, 8);
 }
 void 
-TimestampTag::Deserialize (TagBuffer i)
+FdTimestampTag::Deserialize (TagBuffer i)
 {
   int64_t t;
   i.Read ((uint8_t *)&t, 8);
@@ -322,18 +319,18 @@ TimestampTag::Deserialize (TagBuffer i)
 }
 
 void
-TimestampTag::SetTimestamp (Time time)
+FdTimestampTag::SetTimestamp (Time time)
 {
   m_timestamp = time;
 }
 Time
-TimestampTag::GetTimestamp (void) const
+FdTimestampTag::GetTimestamp (void) const
 {
   return m_timestamp;
 }
 
 void 
-TimestampTag::Print (std::ostream &os) const
+FdTimestampTag::Print (std::ostream &os) const
 {
   os << "t=" << m_timestamp;
 }
