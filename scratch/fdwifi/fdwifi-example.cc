@@ -187,8 +187,6 @@ int main (int argc, char *argv[]) {
     runID = sstr.str ();
   }
 
-  ns3::Packet::EnablePrinting();
-
   // Set up command line parameters used to control the experiment.
   CommandLine cmd;
   cmd.AddValue ("distance", "Distance apart to place nodes (in meters).", distance);
