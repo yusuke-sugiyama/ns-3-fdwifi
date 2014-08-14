@@ -4119,6 +4119,16 @@ def register_Ns3WifiPhyListener_methods(root_module, cls):
                    'void', 
                    [param('ns3::Time', 'duration')], 
                    is_pure_virtual=True, is_virtual=True)
+    ## wifi-phy.h (module 'wifi'): void ns3::WifiPhyListener::NotifyTxPostpone(ns3::Time endTime) [member function]
+    cls.add_method('NotifyTxPostpone', 
+                   'void', 
+                   [param('ns3::Time', 'duration')], 
+                   is_pure_virtual=True, is_virtual=True)
+    ## wifi-phy.h (module 'wifi'): void ns3::WifiPhyListener::NotifyRxPostpone(ns3::Time endTime) [member function]
+    cls.add_method('NotifyRxPostpone', 
+                   'void', 
+                   [param('ns3::Time', 'endTime')], 
+                   is_pure_virtual=True, is_virtual=True)
     return
 
 def register_Ns3WifiRemoteStation_methods(root_module, cls):

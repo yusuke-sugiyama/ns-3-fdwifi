@@ -264,7 +264,7 @@ int main (int argc, char *argv[]) {
   AnimationInterface::SetNodeDescription (nodes, "Nodes"); // Optional
   AnimationInterface::SetNodeColor (nodes, 0, 255, 0);     // Optional
   AnimationInterface anim ("wireless-animation.xml");      // Mandatory
-  anim.EnablePacketMetadata (); // Optional
+  anim.EnablePacketMetadata (true); // Optional
   anim.EnableIpv4RouteTracking ("routingtable-wireless.xml", Seconds (0), Seconds (5), Seconds (0.25)); //Optional
 
   //------------------------------------------------------------
