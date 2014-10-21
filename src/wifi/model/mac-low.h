@@ -28,7 +28,7 @@
 #include <map>
 
 #include "wifi-mac-header.h"
-#include "surround-node-table.h"
+#include "surrounding-node-table.h"
 #include "dca-txop.h"
 #include "wifi-mode.h"
 #include "wifi-preamble.h"
@@ -425,7 +425,7 @@ public:
                           const WifiMacHeader* hdr,
                           MacLowTransmissionParameters parameters,
                           MacLowTransmissionListener *listener);
-  Ptr<SurroundNodeTable> GetSurroundNodeTable ();
+  Ptr<SurroundingNodeTable> GetSurroundingNodeTable ();
   /**
    * Set up WifiPhy associated with this MacLow.
    *
@@ -1088,7 +1088,7 @@ private:
   Ptr<WifiRemoteStationManager> m_stationManager; //!< Pointer to WifiRemoteStationManager (rate control)
   MacLowRxCallback m_rxCallback; //!< Callback to pass packet up
   Ptr<DcaTxop> m_dcaTxop;
-  Ptr<SurroundNodeTable> m_surroundNodeTable; //!< Pointer to SurroundNodeTable)
+  Ptr<SurroundingNodeTable> m_surroundingNodeTable; //!< Pointer to SurroundingNodeTable)
   Mac48Address m_secondaryAddress;
   /**
    * typedef for an iterator for a list of MacLowDcfListener.
